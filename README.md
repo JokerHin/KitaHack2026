@@ -54,94 +54,127 @@ Google AI Studio (Gemini)
         ↓
 Offline Python Pipeline
  └─ Retraining → Export → TFLite
-🛠️ Tech Stack
-Mobile
+<hr/>
 
-Flutter
+<h2>🚀 Getting Started</h2>
 
-TensorFlow Lite
+<h3>1️⃣ Run the Flutter Mobile App</h3>
 
-Material UI (custom modern theme)
-
-Backend / Cloud
-
-Firebase Firestore (real-time database)
-
-Firebase Cloud Functions (AI orchestration & safety logic)
-
-Firebase Cloud Messaging (notifications)
-
-Firebase Storage (logs & artifacts)
-
-AI & ML
-
-TensorFlow / Keras
-
-Scikit-learn
-
-Google Gemini (AI Studio) for explanations
-
-Rule-based clinical safety signals
-
-🚀 Getting Started
-1️⃣ Run the Flutter App
+<pre>
 cd mobile
 cd flutter
 flutter run
+</pre>
 
+<p>
+Runs the Flutter application with on-device TensorFlow Lite inference.
+The app supports manual patient input and AI-generated patient simulation.
+</p>
 
-Requires Flutter SDK and a connected emulator or device.
+<hr/>
 
-2️⃣ Run the Python AI Server (Inference / Demo)
-cd "c:/Users/User/Desktop/Project/KitaHack" && \
+<h3>2️⃣ Run the Python AI Server (Inference & Explanation)</h3>
+
+<pre>
+cd "c:/Users/User/Desktop/Project/KitaHack" && 
 C:/Users/User/Desktop/Project/KitaHack/.venv/Scripts/python.exe model_server.py
+</pre>
 
+<p>
+This service handles:
+</p>
 
-Handles prediction logic, explanations, and feedback logging.
+<ul>
+  <li>AI risk prediction</li>
+  <li>Clinical signal extraction</li>
+  <li>Gemini-powered explanations (optional)</li>
+  <li>Human feedback logging</li>
+</ul>
 
-3️⃣ Train / Retrain the ML Model
-cd "c:/Users/User/Desktop/Project/KitaHack" && \
+<hr/>
+
+<h3>3️⃣ Train or Retrain the Machine Learning Model</h3>
+
+<pre>
+cd "c:/Users/User/Desktop/Project/KitaHack" && 
 C:/Users/User/Desktop/Project/KitaHack/.venv/Scripts/python.exe main.py train
+</pre>
 
+<p>Available commands:</p>
 
-Available commands:
+<ul>
+  <li><strong>train</strong> — fresh model training</li>
+  <li><strong>retrain</strong> — retrain using clinician feedback</li>
+  <li><strong>analyze</strong> — analyze feedback & agreement rate</li>
+  <li><strong>predict</strong> — interactive CLI prediction</li>
+</ul>
 
-train — fresh training
+<hr/>
 
-retrain — retrain using clinician feedback
+<h2>🔁 Human-in-the-Loop Workflow</h2>
 
-analyze — analyze feedback & agreement rate
+<ol>
+  <li>AI model predicts patient risk locally on-device</li>
+  <li>Google Gemini generates a clinical explanation (optional)</li>
+  <li>Clinician reviews AI recommendation</li>
+  <li>Clinician may override the priority</li>
+  <li>Override and notes are logged for audit and retraining</li>
+</ol>
 
-predict — interactive CLI prediction
+<p>
+<strong>Design principle:</strong> AI provides decision support, but clinicians always make the final decision.
+</p>
 
-🔁 Human-in-the-Loop Workflow
+<hr/>
 
-AI predicts patient risk (offline)
+<h2>🔔 Notification & Alert System</h2>
 
-Gemini generates explanation (optional)
+<ul>
+  <li>Real-time queue updates via Firestore streams</li>
+  <li>Audio alerts for new patients</li>
+  <li>Critical alert sound for high-risk cases</li>
+  <li>Push notifications via Firebase Cloud Messaging</li>
+</ul>
 
-Clinician reviews decision
+<hr/>
 
-Clinician may override priority
+<h2>🔐 Responsible AI & Safety</h2>
 
-Feedback is logged for future retraining
+<ul>
+  <li>No fully automated clinical decisions</li>
+  <li>Human-in-the-loop override by design</li>
+  <li>Explainable AI for transparency</li>
+  <li>Audit logs for clinician actions</li>
+  <li>Offline-first inference for reliability</li>
+</ul>
 
-AI assists clinicians — it does not replace them.
+<hr/>
 
-🔐 Responsible AI & Safety
-<ul> <li>Human decisions always override AI</li> <li>No automated clinical decisions</li> <li>Explainability by default</li> <li>Audit logs for all overrides</li> <li>Offline-first for resilience</li> </ul>
-📈 Future Work
+<h2>📈 Future Improvements</h2>
 
-Vertex AI for scalable retraining
+<ul>
+  <li>Vertex AI for large-scale retraining</li>
+  <li>BigQuery analytics for model drift detection</li>
+  <li>Multi-language support (English / Bahasa Malaysia)</li>
+  <li>Role-based clinician access</li>
+  <li>Web dashboard via Firebase Hosting</li>
+</ul>
 
-BigQuery analytics for model drift
+<hr/>
 
-Role-based clinician access
+<h2>🏆 Hackathon Pitch Summary</h2>
 
-Multi-language explanations (EN/BM)
+<blockquote>
+  KitaHack — Triage AI combines edge-based machine learning, generative AI explanations, and
+  human-in-the-loop decision-making to deliver a safe, explainable, and production-ready
+  AI triage system for emergency healthcare.
+</blockquote>
 
-Hospital dashboard (Firebase Hosting)
+<hr/>
 
-🏆 Hackathon Pitch Summary
+<h2>📜 License</h2>
 
-“KitaHack — Triage AI combines edge-based machine learning, generative AI explanations, and human-in-the-loop decision-making to deliver a safe, explainable, and production-ready AI triage system for emergency healthcare.”
+<p>
+This project is built as a proof-of-concept MVP for <strong>KitaHack 2026</strong>.
+</p>
+
