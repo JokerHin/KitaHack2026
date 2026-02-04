@@ -56,6 +56,61 @@ Offline Python Pipeline
  └─ Retraining → Export → TFLite
 <hr/>
 
+<h2>🛠️ Tech Stack</h2>
+
+<h3>📱 Mobile Application</h3>
+<ul>
+  <li><strong>Flutter</strong> — cross-platform mobile framework</li>
+  <li><strong>TensorFlow Lite</strong> — on-device machine learning inference</li>
+  <li><strong>Dart</strong> — application logic and UI</li>
+  <li><strong>Material UI</strong> — modern, clinician-friendly interface</li>
+</ul>
+
+<hr/>
+
+<h3>🧠 Machine Learning & AI</h3>
+<ul>
+  <li><strong>TensorFlow / Keras</strong> — neural network training</li>
+  <li><strong>Scikit-learn</strong> — preprocessing, scaling, evaluation</li>
+  <li><strong>Tabular Clinical Data Modeling</strong></li>
+  <li><strong>Explainable AI (XAI)</strong> — risk reasoning & transparency</li>
+  <li><strong>Google Gemini (AI Studio)</strong> — clinical explanation generation</li>
+</ul>
+
+<hr/>
+
+<h3>☁️ Backend & Cloud</h3>
+<ul>
+  <li><strong>Firebase Firestore</strong> — real-time database for queue & logs</li>
+  <li><strong>Firebase Cloud Functions</strong> — secure AI orchestration</li>
+  <li><strong>Firebase Cloud Messaging</strong> — critical alerts & notifications</li>
+  <li><strong>Firebase Storage</strong> — audit artifacts & logs</li>
+  <li><strong>Firebase Hosting</strong> — optional dashboard hosting</li>
+</ul>
+
+<hr/>
+
+<h3>🔁 MLOps & Model Lifecycle</h3>
+<ul>
+  <li><strong>Offline Training Pipeline (Python)</strong></li>
+  <li><strong>Human-in-the-Loop Feedback Logging</strong></li>
+  <li><strong>Model Versioning</strong></li>
+  <li><strong>Retraining & TFLite Export</strong></li>
+  <li><strong>Performance Evaluation (ROC-AUC, Precision, Recall)</strong></li>
+</ul>
+
+<hr/>
+
+<h3>🔐 Responsible AI & Safety</h3>
+<ul>
+  <li><strong>Human-in-the-Loop Design</strong></li>
+  <li><strong>Clinician Override Mechanism</strong></li>
+  <li><strong>Audit Logs & Traceability</strong></li>
+  <li><strong>Offline-First Architecture</strong></li>
+  <li><strong>Explainability by Default</strong></li>
+</ul>
+
+
 <h2>🚀 Getting Started</h2>
 
 <h3>1️⃣ Run the Flutter Mobile App</h3>
