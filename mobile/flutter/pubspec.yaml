@@ -1,0 +1,24 @@
+name: kitahack_app
+description: Clinical Triage AI - Patient Prioritization System
+publish_to: "none"
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^2.0.0
+  cloud_firestore: ^4.0.0
+  http: ^1.1.0
+  intl: ^0.18.0
+  flutter_svg: ^2.0.9
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: 17.2.3
+  # tflite_flutter removed due to compatibility issues; app will use heuristic fallback.
+  # just_audio removed - requires Android NDK. Audio alerts use print() logs only.
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/

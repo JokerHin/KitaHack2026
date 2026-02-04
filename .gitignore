@@ -1,0 +1,10 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.keras
+model.tflite
+node_modules/
+.firebase/
+/.idea/
+.vscode/
