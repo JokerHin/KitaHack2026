@@ -37,6 +37,7 @@ All decisions remain under **human control**, following responsible and ethical 
 
 ## 🏗️ Planned Architecture
 
+<pre>
 Flutter Mobile App
  ├─ Local TFLite Risk Model (Edge AI)
  ├─ Patient Input + Simulation
@@ -54,6 +55,7 @@ Google AI Studio (Gemini)
         ↓
 Offline Python Pipeline
  └─ Retraining → Export → TFLite
+ </pre>
 <hr/>
 
 <h2>🛠️ Tech Stack</h2>
