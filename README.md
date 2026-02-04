@@ -1,136 +1,147 @@
-🏥 KitaHack — Triage AI (Monorepo)
+<h1 align="center">🩺 KitaHack — Triage AI (Monorepo)</h1>
 
-KitaHack — Triage AI is a triage decision-support MVP designed to assist clinicians in prioritising patients using a combination of on-device machine learning, cloud-based workflows, and optional AI-generated explanations.
-The system focuses on speed, transparency, and clinician control, making it suitable for real-world healthcare constraints.
+<p align="center">
+  <strong>Offline-first, human-in-the-loop AI triage system for emergency care</strong>
+</p>
 
-This repository is a monorepo containing the mobile app, backend services, and machine learning pipeline.
+<p align="center">
+  <img src="https://img.shields.io/badge/Flutter-Mobile-blue" />
+  <img src="https://img.shields.io/badge/TensorFlow-Lite-orange" />
+  <img src="https://img.shields.io/badge/Firebase-Realtime-yellow" />
+  <img src="https://img.shields.io/badge/Google%20Gemini-Explainable%20AI-purple" />
+</p>
 
-✨ Key Features
+<hr/>
 
-📱 Flutter mobile app with offline-first triage scoring
+## 🧠 Overview
 
-🧠 On-device TFLite model for fast and private predictions
+**KitaHack — Triage AI** is a hackathon MVP that demonstrates how **edge AI**, **generative AI**, and **human-in-the-loop workflows** can be combined to build a **safe, explainable, and realistic clinical triage system**.
 
-🩺 Clinician override support for human-in-the-loop decision making
+The system predicts patient risk locally on-device using a **TensorFlow Lite model**, while optionally using **Google Gemini (AI Studio)** to generate clinician-friendly explanations.  
+All decisions remain under **human control**, following responsible and ethical AI principles.
 
-📊 Firebase-backed queue & logs for auditability
+---
 
-🤖 Optional Gemini explanations via Google AI Studio
+## 🎯 Key Features
 
-🔁 Retraining pipeline using real feedback data
+<ul>
+  <li>📱 <strong>Offline-first AI inference</strong> using TensorFlow Lite (no internet required for risk prediction)</li>
+  <li>🧠 <strong>Explainable AI (XAI)</strong> via Google Gemini for clinical reasoning</li>
+  <li>🧑‍⚕️ <strong>Human-in-the-loop triage</strong> with clinician overrides</li>
+  <li>⚡ <strong>Real-time queue updates</strong> using Firebase Firestore</li>
+  <li>🔔 <strong>Critical notifications</strong> with severity-based alerts</li>
+  <li>🔁 <strong>Feedback-driven retraining</strong> pipeline (offline Python)</li>
+</ul>
 
-🧩 Planned Architecture Overview
-Mobile (Flutter)
+---
 
-Runs a local TensorFlow Lite (TFLite) model
+## 🏗️ Planned Architecture
 
-Collects patient inputs (symptoms, vitals, metadata)
-
-Allows clinician overrides on AI priority
-
-Displays prediction explanations for transparency
-
-Works even with limited or no connectivity
-
+Flutter Mobile App
+ ├─ Local TFLite Risk Model (Edge AI)
+ ├─ Patient Input + Simulation
+ ├─ Clinician Override UI
+ └─ Real-time Queue View
+        ↓
 Firebase
+ ├─ Firestore (Queue, Logs, Feedback)
+ ├─ Cloud Functions (Priority Logic, Safety Rules)
+ ├─ Cloud Messaging (Alerts)
+ └─ Hosting (Optional Dashboard)
+        ↓
+Google AI Studio (Gemini)
+ └─ Clinical Explanation & Reasoning (Optional)
+        ↓
+Offline Python Pipeline
+ └─ Retraining → Export → TFLite
+🛠️ Tech Stack
+Mobile
 
-Firestore: patient queue, prediction logs, clinician feedback
+Flutter
 
-Firebase Auth: clinician authentication
+TensorFlow Lite
 
-Cloud Functions: priority logic, validation, queue updates
+Material UI (custom modern theme)
 
-Firebase Hosting: admin / dashboard interface (optional)
+Backend / Cloud
 
-AI Explanation (Optional)
+Firebase Firestore (real-time database)
 
-Google AI Studio (Gemini) used to generate richer, human-readable explanations
+Firebase Cloud Functions (AI orchestration & safety logic)
 
-Called only when network is available
+Firebase Cloud Messaging (notifications)
 
-Not required for core triage functionality
+Firebase Storage (logs & artifacts)
 
-Model Retraining
+AI & ML
 
-Offline Python ML pipeline
+TensorFlow / Keras
 
-Uses logged feedback to improve model accuracy
+Scikit-learn
 
-Retrains and exports updated TFLite models for mobile deployment
+Google Gemini (AI Studio) for explanations
 
-📄 See docs/architecture.md
-for detailed diagrams and next steps.
-
-📁 Repository Structure
-KitaHack/
-├── mobile/
-│ └── flutter/ # Flutter mobile application
-├── model_server.py # Local Python inference / testing server
-├── main.py # ML training pipeline
-├── docs/
-│ └── architecture.md
-├── .venv/ # Python virtual environment
-└── README.md
+Rule-based clinical safety signals
 
 🚀 Getting Started
-Prerequisites
-
-Flutter (stable channel)
-
-Android Studio or Android SDK
-
-Python 3.10+
-
-Virtual environment set up (.venv)
-
-Firebase project (for cloud features)
-
-📱 Run the Flutter App
+1️⃣ Run the Flutter App
 cd mobile
 cd flutter
 flutter run
 
-Make sure an emulator or physical device is connected.
 
-🧪 Run the Python Model Server
+Requires Flutter SDK and a connected emulator or device.
 
-Used for local testing and experimentation.
-
+2️⃣ Run the Python AI Server (Inference / Demo)
 cd "c:/Users/User/Desktop/Project/KitaHack" && \
 C:/Users/User/Desktop/Project/KitaHack/.venv/Scripts/python.exe model_server.py
 
-🧠 Train the Machine Learning Model
 
-This retrains the triage model using collected data and exports an updated version.
+Handles prediction logic, explanations, and feedback logging.
 
+3️⃣ Train / Retrain the ML Model
 cd "c:/Users/User/Desktop/Project/KitaHack" && \
 C:/Users/User/Desktop/Project/KitaHack/.venv/Scripts/python.exe main.py train
 
-🔐 Human-in-the-Loop Design
 
-This system is not fully autonomous by design.
+Available commands:
 
-AI provides recommendations
+train — fresh training
 
-Clinicians review and override
+retrain — retrain using clinician feedback
 
-All decisions are logged for audit and retraining
+analyze — analyze feedback & agreement rate
 
-This ensures safety, accountability, and real clinical usability.
+predict — interactive CLI prediction
 
-🛠 Tech Stack
+🔁 Human-in-the-Loop Workflow
 
-Frontend: Flutter
+AI predicts patient risk (offline)
 
-ML: TensorFlow / TFLite, Python
+Gemini generates explanation (optional)
 
-Backend: Firebase (Firestore, Auth, Functions)
+Clinician reviews decision
 
-AI (Optional): Google Gemini (AI Studio)
+Clinician may override priority
 
-Deployment: Android (initial), extensible to iOS
+Feedback is logged for future retraining
 
-📌 Status
+AI assists clinicians — it does not replace them.
 
-🚧 MVP / Hackathon Stage
-Core features are under active development. Architecture is designed to scale into production with minimal changes.
+🔐 Responsible AI & Safety
+<ul> <li>Human decisions always override AI</li> <li>No automated clinical decisions</li> <li>Explainability by default</li> <li>Audit logs for all overrides</li> <li>Offline-first for resilience</li> </ul>
+📈 Future Work
+
+Vertex AI for scalable retraining
+
+BigQuery analytics for model drift
+
+Role-based clinician access
+
+Multi-language explanations (EN/BM)
+
+Hospital dashboard (Firebase Hosting)
+
+🏆 Hackathon Pitch Summary
+
+“KitaHack — Triage AI combines edge-based machine learning, generative AI explanations, and human-in-the-loop decision-making to deliver a safe, explainable, and production-ready AI triage system for emergency healthcare.”
