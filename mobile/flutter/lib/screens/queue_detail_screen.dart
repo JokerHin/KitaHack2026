@@ -51,166 +51,257 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
     }
   }
 
+  Color _getRiskColor(double prob) {
+    if (prob >= 0.8) return const Color(0xFFDC2626);
+    if (prob >= 0.4) return const Color(0xFFEA580C);
+    return const Color(0xFF16A34A);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ai = widget.data['ai_result'] ?? {};
     final prob = (ai['risk_probability'] ?? 0.0) as double;
     final patient = (widget.data['patient_data'] ?? {}) as Map<String, dynamic>;
     final category = ModelService.instance.getRiskCategory(prob);
+    final riskColor = _getRiskColor(prob);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      body: CustomScrollView(
-        slivers: [
-          // Modern gradient app bar with patient info
-          SliverAppBar(
-            expandedHeight: 200,
-            floating: false,
-            pinned: true,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _riskColor(prob),
-                      _riskColor(prob).withOpacity(0.7),
-                    ],
-                  ),
-                ),
-                child: SafeArea(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(60, 40, 20, 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 32,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          patient['name'] ?? 'Patient',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          patient['complaint'] ?? '',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.chat_bubble_outline),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => QueueChatScreen(patient: patient),
-                    ),
-                  );
-                },
-                tooltip: 'Chat with AI',
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline),
-                onPressed: () async {
-                  final confirm = await showDialog<bool>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Delete patient'),
-                      content:
-                          const Text('Remove this patient from the queue?'),
-                      actions: [
-                        TextButton(
-                            onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text('Cancel')),
-                        TextButton(
-                            onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text('Delete',
-                                style: TextStyle(color: Colors.red))),
-                      ],
-                    ),
-                  );
-                  if (confirm == true) {
-                    try {
-                      await FirestoreService.instance
-                          .deletePatient(widget.docId);
-                      Navigator.pop(context);
-                    } catch (e) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Delete failed')));
-                    }
-                  }
-                },
-                tooltip: 'Delete patient',
-              ),
-            ],
+      backgroundColor: const Color(0xFFF0F7FB),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF4FA3D1),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Patient Details',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
           ),
-          // Content
-          SliverToBoxAdapter(
-            child: Padding(
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: Colors.white),
+            onPressed: () async {
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Remove Patient'),
+                  content: const Text('Remove this patient from the queue?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Remove',
+                          style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm == true) {
+                try {
+                  await FirestoreService.instance.deletePatient(widget.docId);
+                  Navigator.pop(context);
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Failed to remove patient')),
+                  );
+                }
+              }
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Patient header card
+            Container(
+              margin: const EdgeInsets.all(16),
               padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Risk summary cards
+                  // Patient name and risk badge
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Expanded(
-                        child: _modernInfoCard(
-                          'Risk Level',
-                          '${(prob * 100).toStringAsFixed(0)}%',
-                          Icons.warning_rounded,
-                          _riskColor(prob),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              patient['name'] ?? 'Unknown Patient',
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.medical_information_outlined,
+                                  size: 14,
+                                  color: Color(0xFF4FA3D1),
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    patient['complaint'] ?? 'No complaint recorded',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF64748B),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Expanded(
-                        child: _modernInfoCard(
-                          'Category',
-                          category,
-                          Icons.label,
-                          _riskColor(prob),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: riskColor.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: riskColor, width: 1.5),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${(prob * 100).toStringAsFixed(0)}%',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                                color: riskColor,
+                              ),
+                            ),
+                            Text(
+                              category,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: riskColor,
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 24),
-                  // Vitals section
+                ],
+              ),
+            ),
+            
+            // Vital signs section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   const Text(
                     'Vital Signs',
                     style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  GridView(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.2,
+                    ),
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      _vitalSignCard(
+                        '❤️',
+                        'Heart Rate',
+                        '${patient['heart_rate'] ?? '—'} bpm',
+                        const Color(0xFFDC2626),
+                      ),
+                      _vitalSignCard(
+                        '💨',
+                        'Oxygen Level',
+                        '${patient['oxygen'] ?? '—'}%',
+                        const Color(0xFF2563EB),
+                      ),
+                      _vitalSignCard(
+                        '🌡️',
+                        'Temperature',
+                        patient['temperature'] != null
+                            ? '${(patient['temperature'] as num).toStringAsFixed(1)}°C'
+                            : '—°C',
+                        const Color(0xFFF59E0B),
+                      ),
+                      _vitalSignCard(
+                        '😣',
+                        'Pain Level',
+                        '${patient['pain_scale'] ?? '—'}/10',
+                        const Color(0xFF9333EA),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Transfer Patient - Slide to Unlock Style
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: _buildSlideToTransferButton(),
+            ),
+            const SizedBox(height: 20),
+
+            // AI Assessment section
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'AI Assessment',
+                    style: TextStyle(
                       fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Container(
-                    padding: const EdgeInsets.all(20),
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -222,262 +313,264 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
                         ),
                       ],
                     ),
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      childAspectRatio: 2.2,
-                      children: [
-                        _vitalCard(Icons.favorite, 'Heart Rate',
-                            '${patient['heart_rate'] ?? '-'} bpm', Colors.red),
-                        _vitalCard(Icons.air, 'Oxygen',
-                            '${patient['oxygen'] ?? '-'}%', Colors.blue),
-                        _vitalCard(
-                            Icons.thermostat,
-                            'Temperature',
-                            '${patient['temperature'] ?? '-'}°C',
-                            Colors.orange),
-                        _vitalCard(
-                            Icons.healing,
-                            'Pain Scale',
-                            '${patient['pain_scale'] ?? '-'}/10',
-                            Colors.purple),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  // AI Explanation
-                  const Text(
-                    'AI Clinical Analysis',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1F2937),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF3B82F6).withOpacity(0.05),
-                          Colors.white,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                          color: const Color(0xFF3B82F6).withOpacity(0.2)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
                     child: _loading
                         ? Row(
-                            children: const [
-                              SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                      strokeWidth: 2)),
-                              SizedBox(width: 12),
-                              Text('Analyzing patient data...'),
-                            ],
-                          )
-                        : Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: const [
-                                  Icon(Icons.psychology,
-                                      color: Color(0xFF3B82F6), size: 24),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Clinical Assessment',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1F2937),
-                                    ),
-                                  ),
-                                ],
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation(riskColor),
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              Text(
-                                _explanation,
-                                style: const TextStyle(
-                                  color: Color(0xFF374151),
-                                  height: 1.6,
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Analyzing patient data...',
+                                style: TextStyle(
+                                  color: Color(0xFF64748B),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
+                          )
+                        : Text(
+                            _explanation,
+                            style: const TextStyle(
+                              color: Color(0xFF0F172A),
+                              fontSize: 13,
+                              height: 1.6,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 12),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
                       onPressed: _loadExplanation,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Regenerate Analysis'),
+                      icon: const Icon(Icons.refresh, size: 18),
+                      label: const Text('Regenerate'),
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        backgroundColor: const Color(0xFF4FA3D1),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 80),
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => QueueChatScreen(patient: patient),
-            ),
-          );
-        },
-        icon: const Icon(Icons.chat),
-        label: const Text('Chat with AI'),
+            const SizedBox(height: 20),
+          ],
+        ),
       ),
     );
   }
 
-  Color _riskColor(double p) {
-    if (p >= 0.8) return const Color(0xFFEF4444);
-    if (p >= 0.4) return const Color(0xFFF59E0B);
-    return const Color(0xFF10B981);
+  void _showTransferDialog(BuildContext context, String currentCategory) {
+    final specialties = [
+      'Cardiology',
+      'Orthopedics',
+      'Dermatology',
+      'Neurology',
+      'Gastroenterology',
+      'Pulmonology',
+      'Rheumatology',
+      'Endocrinology',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Transfer Patient'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            itemCount: specialties.length,
+            itemBuilder: (context, index) => ListTile(
+              title: Text(specialties[index]),
+              onTap: () {
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Patient transferred to ${specialties[index]}',
+                    ),
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _modernInfoCard(
-      String label, String value, IconData icon, Color color) {
+  Widget _vitalSignCard(
+    String emoji,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 20)),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF64748B),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           Text(
             value,
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
               color: color,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontSize: 12,
-            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
     );
   }
 
-  Widget _vitalCard(IconData icon, String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.2)),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildSlideToTransferButton() {
+    final ai = widget.data['ai_result'] ?? {};
+    final prob = (ai['risk_probability'] ?? 0.0) as double;
+    final category = ModelService.instance.getRiskCategory(prob);
+    final riskColor = _getRiskColor(prob);
+
+    return Column(
+      children: [
+        // Slide to Transfer Button
+        GestureDetector(
+          onHorizontalDragEnd: (details) {
+            // If dragged far enough to the right, trigger transfer
+            if (details.primaryVelocity! > 500) {
+              _showTransferDialog(context, category);
+            }
+          },
+          child: Container(
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: riskColor,
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
+                // Background text
+                Center(
+                  child: Text(
+                    'Slide to Transfer Patient',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: riskColor.withOpacity(0.4),
+                    ),
                   ),
                 ),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                // Slide button
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    margin: const EdgeInsets.all(4),
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: riskColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: riskColor.withOpacity(0.3),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                      size: 22,
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _infoTile(String label, String value, {Color color = Colors.black}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
-          const SizedBox(height: 4),
-          Text(value,
-              style: TextStyle(color: color, fontWeight: FontWeight.w600)),
-        ],
-      ),
-    );
-  }
-
-  Widget _vital(String label, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        children: [
-          Text(label,
-              style: const TextStyle(color: Color(0xFF64748B), fontSize: 12)),
-          const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
-        ],
-      ),
+        ),
+        const SizedBox(height: 12),
+        // Chat with AI Button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => QueueChatScreen(patient: widget.data['patient_data'] as Map<String, dynamic>? ?? {}),
+                ),
+              );
+            },
+            icon: const Icon(Icons.chat_rounded, size: 18),
+            label: const Text('Chat with AI'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4FA3D1),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 13),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

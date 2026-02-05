@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/firestore_service.dart';
+import 'queue_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -8,7 +9,7 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF0F7FB),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirestoreService.instance.queueStream(),
         builder: (context, snapshot) {
@@ -21,67 +22,55 @@ class DashboardScreen extends StatelessWidget {
                   (d['ai_result']?['risk_probability'] ?? 0.0) >= 0.4 &&
                   (d['ai_result']?['risk_probability'] ?? 0.0) < 0.8)
               .length;
+          final total = docs.length;
 
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Gradient Header
+                // Modern Header with Avatar
                 Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        const Color(0xFF1E40AF),
-                        const Color(0xFF3B82F6),
-                      ],
-                    ),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF4FA3D1),
                   ),
                   child: SafeArea(
                     bottom: false,
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+                      padding: const EdgeInsets.all(20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Hello!',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'Triage System',
+                                    style: TextStyle(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              CircleAvatar(
+                                radius: 32,
+                                backgroundColor: Colors.white.withOpacity(0.3),
                                 child: const Icon(
                                   Icons.local_hospital,
                                   color: Colors.white,
-                                  size: 28,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Triage Dashboard',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                        letterSpacing: -0.5,
-                                      ),
-                                    ),
-                                    Text(
-                                      'AI-Powered Patient Monitoring',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  ],
+                                  size: 32,
                                 ),
                               ),
                             ],
@@ -91,106 +80,194 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                Transform.translate(
-                  offset: const Offset(0, -16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Stats Grid
-                        GridView.count(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio: 1.65,
-                          children: [
-                            _modernStatCard(
-                              'Critical',
-                              critical.toString(),
-                              Icons.warning_rounded,
-                              const Color(0xFF1F2937),
-                              const Color(0xFFF3F4F6),
-                            ),
-                            _modernStatCard(
-                              'Urgent',
-                              urgent.toString(),
-                              Icons.priority_high,
-                              const Color(0xFF4B5563),
-                              const Color(0xFFF9FAFB),
-                            ),
-                            _modernStatCard(
-                              'In Queue',
-                              docs.length.toString(),
-                              Icons.people,
-                              const Color(0xFF1F2937),
-                              const Color(0xFFF3F4F6),
-                            ),
-                            _modernStatCard(
-                              'Stable',
-                              (docs.length - critical - urgent).toString(),
-                              Icons.check_circle,
-                              const Color(0xFF4B5563),
-                              const Color(0xFFF9FAFB),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 24),
-                        // AI Insights Card
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(
-                              color: const Color(0xFFE5E7EB),
-                              width: 1,
+                const SizedBox(height: 20),
+
+                // Stats Cards
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Critical',
+                              value: critical.toString(),
+                              bgColor: const Color(0xFFFFE5E5),
+                              textColor: const Color(0xFFDC2626),
+                              icon: Icons.priority_high,
                             ),
                           ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Urgent',
+                              value: urgent.toString(),
+                              bgColor: const Color(0xFFFEF1E5),
+                              textColor: const Color(0xFFEA580C),
+                              icon: Icons.warning_rounded,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Total Queue',
+                              value: total.toString(),
+                              bgColor: const Color(0xFFDEF0FF),
+                              textColor: const Color(0xFF3B82F6),
+                              icon: Icons.people,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Stable',
+                              value: (total - critical - urgent).toString(),
+                              bgColor: const Color(0xFFE7F5E7),
+                              textColor: const Color(0xFF16A34A),
+                              icon: Icons.check_circle,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Services Section
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Services',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _ServiceIcon(
+                              icon: Icons.list_alt_rounded,
+                              label: 'Queue',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const QueueScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ServiceIcon(
+                              icon: Icons.assessment_rounded,
+                              label: 'Reports',
+                              onTap: () {},
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ServiceIcon(
+                              icon: Icons.schedule_rounded,
+                              label: 'Schedule',
+                              onTap: () {},
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _ServiceIcon(
+                              icon: Icons.settings_rounded,
+                              label: 'Settings',
+                              onTap: () {},
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Quick Action Banner
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF4FA3D1),
+                          const Color(0xFF4FA3D1).withOpacity(0.8),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF4FA3D1).withOpacity(0.2),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
                           child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF1F2937),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Icon(
-                                  Icons.psychology,
-                                  size: 48,
+                              const Text(
+                                'Manage Queue',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
                                   color: Colors.white,
                                 ),
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 4),
                               const Text(
-                                'AI-Powered Triage',
+                                'View and manage all patients',
                                 style: TextStyle(
-                                  color: Color(0xFF1F2937),
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                'Real-time risk assessment using machine learning to prioritize critical patients',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  color: Color(0xFF6B7280),
-                                  fontSize: 14,
-                                  height: 1.5,
+                                  fontSize: 13,
+                                  color: Colors.white70,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.3),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
+                const SizedBox(height: 32),
               ],
             ),
           );
@@ -198,87 +275,124 @@ class DashboardScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _modernStatCard(
-      String label, String value, IconData icon, Color color, Color bgColor) {
+// Stat Card Widget
+class _StatCard extends StatelessWidget {
+  final String title;
+  final String value;
+  final Color bgColor;
+  final Color textColor;
+  final IconData icon;
+
+  const _StatCard({
+    required this.title,
+    required this.value,
+    required this.bgColor,
+    required this.textColor,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: bgColor,
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFE5E7EB),
+          color: textColor.withOpacity(0.1),
           width: 1,
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(5),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Icon(icon, color: color, size: 16),
+          Icon(
+            icon,
+            color: textColor,
+            size: 24,
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-          ),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 10,
-              color: Color(0xFF9CA3AF),
-              fontWeight: FontWeight.w500,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCard(String label, String value, Color color, IconData icon) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 24),
           const SizedBox(height: 12),
           Text(
             value,
             style: TextStyle(
               fontSize: 28,
-              fontWeight: FontWeight.bold,
-              color: color,
-              letterSpacing: -0.5,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            label,
-            style: const TextStyle(
-              color: Color(0xFF64748B),
-              fontWeight: FontWeight.w500,
+            title,
+            style: TextStyle(
               fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: textColor.withOpacity(0.8),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Service Icon Widget
+class _ServiceIcon extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const _ServiceIcon({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFDEF0FF),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                icon,
+                color: const Color(0xFF4FA3D1),
+                size: 24,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0F172A),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -73,17 +73,27 @@ class _QueueScreenState extends State<QueueScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
+      backgroundColor: const Color(0xFFF0F7FB),
       appBar: AppBar(
-        title: const Text('Live Queue'),
+        elevation: 0,
+        backgroundColor: const Color(0xFF4FA3D1),
+        title: const Text(
+          'Patient Queue',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh, size: 20),
+            icon: const Icon(Icons.refresh, size: 20, color: Colors.white),
             onPressed: () {},
             tooltip: 'Refresh',
           ),
           IconButton(
-            icon: Icon(_autoGenerating ? Icons.stop : Icons.play_arrow),
+            icon: Icon(_autoGenerating ? Icons.stop : Icons.play_arrow,
+                color: Colors.white),
             onPressed: _toggleAutoGenerate,
             tooltip:
                 _autoGenerating ? 'Stop auto-generate' : 'Start auto-generate',
@@ -140,26 +150,33 @@ class _QueueScreenState extends State<QueueScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.check_circle_outline,
-                    size: 48,
-                    color: const Color(0xFF64748B).withOpacity(0.4),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFDEF0FF),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.check_circle_outline,
+                      size: 48,
+                      color: const Color(0xFF4FA3D1),
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
                     'No patients in queue',
                     style: TextStyle(
-                      color: Color(0xFF1F2937),
-                      fontSize: 16,
+                      color: Color(0xFF0F172A),
+                      fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 6),
                   const Text(
-                    'All clear',
+                    'All patients have been processed',
                     style: TextStyle(
                       color: Color(0xFF64748B),
-                      fontSize: 13,
+                      fontSize: 14,
                     ),
                   ),
                 ],
@@ -177,10 +194,13 @@ class _QueueScreenState extends State<QueueScreen> {
               final patient = d['patient_data'] ?? {};
 
               final Color riskColor = prob >= 0.8
-                  ? Colors.red
-                  : (prob >= 0.4 ? Colors.orange : Colors.green);
+                  ? const Color(0xFFDC2626)
+                  : (prob >= 0.4 ? const Color(0xFFEA580C) : const Color(0xFF16A34A));
+              final String riskLabel = prob >= 0.8
+                  ? 'Critical'
+                  : (prob >= 0.4 ? 'Urgent' : 'Stable');
 
-              return InkWell(
+              return GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
@@ -195,18 +215,7 @@ class _QueueScreenState extends State<QueueScreen> {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.white,
-                        prob >= 0.8
-                            ? Colors.red.withOpacity(0.02)
-                            : (prob >= 0.4
-                                ? Colors.orange.withOpacity(0.02)
-                                : Colors.green.withOpacity(0.02)),
-                      ],
-                    ),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
@@ -216,115 +225,172 @@ class _QueueScreenState extends State<QueueScreen> {
                       ),
                     ],
                   ),
-                  child: IntrinsicHeight(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          decoration: BoxDecoration(
-                            color: riskColor,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(16),
-                              bottomLeft: Radius.circular(16),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Patient #${docs[i].id.substring(0, 5)}',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16),
-                                    ),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: riskColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(8),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Patient #${docs[i].id.substring(0, 5).toUpperCase()}',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 16,
+                                          color: Color(0xFF0F172A),
+                                        ),
                                       ),
-                                      child: Text(
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.medical_information_outlined,
+                                            size: 14,
+                                            color: const Color(0xFF4FA3D1),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          Expanded(
+                                            child: Text(
+                                              patient['complaint'] ?? 'No symptoms',
+                                              style: const TextStyle(
+                                                color: Color(0xFF64748B),
+                                                fontSize: 13,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: riskColor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: riskColor.withOpacity(0.3),
+                                      width: 1,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Text(
                                         '${(prob * 100).toStringAsFixed(0)}%',
                                         style: TextStyle(
                                           color: riskColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14,
                                         ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  spacing: 12,
-                                  runSpacing: 4,
-                                  children: [
-                                    _vitalBadge(
-                                        Icons.air, '${patient['oxygen']}%'),
-                                    _vitalBadge(Icons.favorite,
-                                        '${patient['heart_rate']}'),
-                                    _vitalBadge(Icons.thermostat,
-                                        '${patient['temperature']}°C'),
-                                  ],
+                                      Text(
+                                        riskLabel,
+                                        style: TextStyle(
+                                          color: riskColor,
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 11,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline,
-                                  color: Colors.grey),
-                              onPressed: () async {
-                                final confirm = await showDialog<bool>(
-                                  context: context,
-                                  builder: (ctx) => AlertDialog(
-                                    title: const Text('Delete patient'),
-                                    content: const Text(
-                                        'Remove this patient from the queue?'),
-                                    actions: [
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(ctx, false),
-                                          child: const Text('Cancel')),
-                                      TextButton(
-                                          onPressed: () =>
-                                              Navigator.pop(ctx, true),
-                                          child: const Text('Delete')),
-                                    ],
+                            const SizedBox(height: 12),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Waiting: ${patient['waiting_time'] ?? 0} min',
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 12,
                                   ),
-                                );
-                                if (confirm == true) {
-                                  try {
-                                    await FirestoreService.instance
-                                        .deletePatient(docs[i].id);
-                                  } catch (e) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content: Text('Delete failed')));
-                                  }
-                                }
-                              },
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.only(right: 8.0),
-                              child:
-                                  Icon(Icons.chevron_right, color: Colors.grey),
+                                ),
+                                Text(
+                                  'Age: ${patient['age'] ?? '--'}',
+                                  style: const TextStyle(
+                                    color: Color(0xFF94A3B8),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: 0,
+                        child: GestureDetector(
+                          onTap: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Remove Patient'),
+                                content: const Text(
+                                    'Remove this patient from the queue?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(ctx, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.pop(ctx, true),
+                                    child: const Text('Remove'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              try {
+                                await FirestoreService.instance
+                                    .deletePatient(docs[i].id);
+                              } catch (e) {
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Failed to remove patient'),
+                                    ),
+                                  );
+                                }
+                              }
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFEE2E2),
+                              borderRadius: const BorderRadius.only(
+                                topRight: Radius.circular(16),
+                                bottomLeft: Radius.circular(8),
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              size: 16,
+                              color: Color(0xFFDC2626),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -332,17 +398,6 @@ class _QueueScreenState extends State<QueueScreen> {
           );
         },
       ),
-    );
-  }
-
-  Widget _vitalBadge(IconData icon, String value) {
-    return Row(
-      children: [
-        Icon(icon, size: 14, color: Colors.grey.shade600),
-        const SizedBox(width: 4),
-        Text(value,
-            style: TextStyle(color: Colors.grey.shade800, fontSize: 13)),
-      ],
     );
   }
 
