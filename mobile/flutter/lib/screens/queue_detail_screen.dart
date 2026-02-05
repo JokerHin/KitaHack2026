@@ -57,6 +57,44 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
     return const Color(0xFF16A34A);
   }
 
+  // Check if vital sign is abnormal
+  bool _isAbnormal(String label, dynamic value) {
+    if (value == null || value == '—') return false;
+    
+    try {
+      switch (label) {
+        case 'Heart Rate':
+          final hr = (value is String) 
+              ? double.parse(value.replaceAll(RegExp(r'[^0-9.]'), '')) 
+              : (value as num).toDouble();
+          return hr < 60 || hr > 100;
+          
+        case 'Oxygen Level':
+          final o2 = (value is String) 
+              ? double.parse(value.replaceAll(RegExp(r'[^0-9.]'), '')) 
+              : (value as num).toDouble();
+          return o2 < 95 || o2 > 100;
+          
+        case 'Temperature':
+          final temp = (value is String) 
+              ? double.parse(value.replaceAll(RegExp(r'[^0-9.]'), '')) 
+              : (value as num).toDouble();
+          return temp < 36.5 || temp > 37.5;
+          
+        case 'Pain Level':
+          final pain = (value is String) 
+              ? double.parse(value.replaceAll(RegExp(r'[^0-9.]'), '')) 
+              : (value as num).toDouble();
+          return pain > 3;
+          
+        default:
+          return false;
+      }
+    } catch (e) {
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ai = widget.data['ai_result'] ?? {};
@@ -373,16 +411,16 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
   }
 
   void _showTransferDialog(BuildContext context, String currentCategory) {
-    final specialties = [
-      'Cardiology',
-      'Orthopedics',
-      'Dermatology',
-      'Neurology',
-      'Gastroenterology',
-      'Pulmonology',
-      'Rheumatology',
-      'Endocrinology',
-    ];
+    final specialties = {
+      'Cardiology': '❤️',
+      'Orthopedics': '🦴',
+      'Dermatology': '🩹',
+      'Neurology': '🧠',
+      'Gastroenterology': '🫘',
+      'Pulmonology': '🫁',
+      'Rheumatology': '🦵',
+      'Endocrinology': '⚗️',
+    };
 
     showDialog(
       context: context,
@@ -392,20 +430,28 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
           width: double.maxFinite,
           child: ListView.builder(
             itemCount: specialties.length,
-            itemBuilder: (context, index) => ListTile(
-              title: Text(specialties[index]),
-              onTap: () {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Patient transferred to ${specialties[index]}',
+            itemBuilder: (context, index) {
+              final specialty = specialties.keys.elementAt(index);
+              final emoji = specialties[specialty]!;
+              return ListTile(
+                leading: Text(
+                  emoji,
+                  style: const TextStyle(fontSize: 20),
+                ),
+                title: Text(specialty),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Patient transferred to $emoji $specialty',
+                      ),
+                      duration: const Duration(seconds: 2),
                     ),
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
-              },
-            ),
+                  );
+                },
+              );
+            },
           ),
         ),
       ),
@@ -418,10 +464,12 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
     String value,
     Color color,
   ) {
+    final isAbnormal = _isAbnormal(label, value);
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isAbnormal ? color : Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
@@ -442,10 +490,10 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF64748B),
+                    color: isAbnormal ? Colors.white : const Color(0xFF64748B),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -459,7 +507,7 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: color,
+              color: isAbnormal ? Colors.white : color,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -478,72 +526,9 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
     return Column(
       children: [
         // Slide to Transfer Button
-        GestureDetector(
-          onHorizontalDragEnd: (details) {
-            // If dragged far enough to the right, trigger transfer
-            if (details.primaryVelocity! > 500) {
-              _showTransferDialog(context, category);
-            }
-          },
-          child: Container(
-            height: 56,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: riskColor,
-                width: 1.5,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Background text
-                Center(
-                  child: Text(
-                    'Slide to Transfer Patient',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: riskColor.withOpacity(0.4),
-                    ),
-                  ),
-                ),
-                // Slide button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.all(4),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: riskColor,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: riskColor.withOpacity(0.3),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+        _SlideToTransferButton(
+          onTransfer: () => _showTransferDialog(context, category),
+          riskColor: riskColor,
         ),
         const SizedBox(height: 12),
         // Chat with AI Button
@@ -571,6 +556,130 @@ class _QueueDetailScreenState extends State<QueueDetailScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SlideToTransferButton extends StatefulWidget {
+  final VoidCallback onTransfer;
+  final Color riskColor;
+
+  const _SlideToTransferButton({
+    required this.onTransfer,
+    required this.riskColor,
+  });
+
+  @override
+  State<_SlideToTransferButton> createState() => _SlideToTransferButtonState();
+}
+
+class _SlideToTransferButtonState extends State<_SlideToTransferButton> {
+  late double _dragOffset;
+
+  @override
+  void initState() {
+    super.initState();
+    _dragOffset = 0;
+  }
+
+  void _resetSlide() {
+    setState(() {
+      _dragOffset = 0.0;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 56),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Highway length
+          final double maxDragDistance = constraints.maxWidth - 48 - 8;
+
+          return Container(
+            height: 56,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: widget.riskColor, width: 1.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Stack(
+              alignment: Alignment.centerLeft, // Start from LEFT
+              children: [
+                // 1. Text Background (Cannot touch)
+                Center(
+                  child: Text(
+                    'Slide to Transfer Patient',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: widget.riskColor.withOpacity(0.4),
+                    ),
+                  ),
+                ),
+                
+                // 2. The Button (The thing you actually touch)
+                Transform.translate(
+                  offset: Offset(_dragOffset, 0),
+                  // MOVED GESTURE DETECTOR HERE 👇
+                  child: GestureDetector(
+                    onHorizontalDragUpdate: (details) {
+                      setState(() {
+                        // Now 'delta' is exactly how much YOUR FINGER moved
+                        double newPos = _dragOffset + details.delta.dx;
+                        _dragOffset = newPos.clamp(0.0, maxDragDistance);
+                      });
+                    },
+                    onHorizontalDragEnd: (details) {
+                      if (_dragOffset > maxDragDistance * 0.7 || 
+                          details.primaryVelocity! > 800) {
+                        widget.onTransfer();
+                        _resetSlide();
+                      } else {
+                        _resetSlide();
+                      }
+                    },
+                    onHorizontalDragCancel: () {
+                      _resetSlide();
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      margin: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: widget.riskColor,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: widget.riskColor.withOpacity(0.3),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        _dragOffset > (maxDragDistance * 0.9)
+                            ? Icons.check_rounded
+                            : Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 22,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

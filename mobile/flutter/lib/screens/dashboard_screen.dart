@@ -96,6 +96,16 @@ class DashboardScreen extends StatelessWidget {
                               bgColor: const Color(0xFFFFE5E5),
                               textColor: const Color(0xFFDC2626),
                               icon: Icons.priority_high,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const QueueScreen(
+                                      filterLevel: 'critical',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -106,6 +116,16 @@ class DashboardScreen extends StatelessWidget {
                               bgColor: const Color(0xFFFEF1E5),
                               textColor: const Color(0xFFEA580C),
                               icon: Icons.warning_rounded,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const QueueScreen(
+                                      filterLevel: 'urgent',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -120,6 +140,14 @@ class DashboardScreen extends StatelessWidget {
                               bgColor: const Color(0xFFDEF0FF),
                               textColor: const Color(0xFF3B82F6),
                               icon: Icons.people,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const QueueScreen(),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -130,6 +158,16 @@ class DashboardScreen extends StatelessWidget {
                               bgColor: const Color(0xFFE7F5E7),
                               textColor: const Color(0xFF16A34A),
                               icon: Icons.check_circle,
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const QueueScreen(
+                                      filterLevel: 'stable',
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
@@ -284,6 +322,7 @@ class _StatCard extends StatelessWidget {
   final Color bgColor;
   final Color textColor;
   final IconData icon;
+  final VoidCallback? onTap;
 
   const _StatCard({
     required this.title,
@@ -291,47 +330,51 @@ class _StatCard extends StatelessWidget {
     required this.bgColor,
     required this.textColor,
     required this.icon,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: textColor.withOpacity(0.1),
-          width: 1,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: textColor.withOpacity(0.1),
+            width: 1,
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            icon,
-            color: textColor,
-            size: 24,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(
+              icon,
               color: textColor,
+              size: 24,
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: textColor.withOpacity(0.8),
+            const SizedBox(height: 12),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 4),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textColor.withOpacity(0.8),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
